@@ -14,14 +14,18 @@ export const sendEmail = async ({
   try {
     const hashedToken = await bcryptjs.hash(userId.toString(), 10);
     if (emailType === "VERIFY") {
-      await User.findByIdAndUpdate(userId, {
-        verifyToken: hashedToken,
-        verifyTokenExpiry: Date.now() + 3600000,
+      const updatedUser = await User.findByIdAndUpdate(userId, {
+        $set: {
+          verifyToken: hashedToken,
+          verifyTokenExpiry: Date.now() + 3600000,
+        },
       });
     } else if (emailType === "RESET") {
       await User.findByIdAndUpdate(userId, {
-        forgotPasswordToken: hashedToken,
-        forgotPasswordTokenExpiry: Date.now() + 3600000,
+        $set: {
+          forgotPasswordToken: hashedToken,
+          forgotPasswordTokenExpiry: Date.now() + 3600000,
+        },
       });
     } else {
       throw new Error("Invalid email type");
@@ -52,11 +56,7 @@ export const sendEmail = async ({
           : "reset your password"
       }:
     </p>
-    <a href="${process.env.DOMAIN}/${
-        emailType === "VERIFY" ? "verify-email" : "reset-password"
-      }?token=${hashedToken}">
-      Click here
-    </a>
+    <br> ${process.env.DOMAIN}/verifyemail?token=${hashedToken}
     <p>If you did not request this, please ignore this email.</p>
   </div>
 `,
